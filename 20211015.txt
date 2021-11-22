@@ -1,0 +1,180 @@
+1. 리눅스 환경(우분투)
+2. 자바환경(하둡, 카프카, 스파크)
+3. 하둡
+4. 스파크
+5. 카프카
+
+리눅스(윈도우) 환경변수
+- 프로세스마다 하나씩 존재
+- 새로운 프로세스 생성(fork, create process)시 부모 프로세스의 환경변수 복사 
+
+export SAMPLE=test
+echo $SAMPLE
+
+.bashrc / .profile 설정 자동화(도커와 상이)
+
+TCO
+EXADATA 300만 불(IBM의 가성비 3배)
+
+Lonestar / Qualcomm / MS
+
+1. 버추얼박스 다운로드
+2. 버추얼박스 확장팩 다운로드
+3. 가상머신(iso) 다운로드
+4. 버추얼박스 실행 -> 파일 -> 가상 시스템 가져오기
+    -> ISO 선택 -> 다음 -> 가져오기
+5. 가상머신 -> 시작 -> 로그인(아이디:ubuntu /비밀번호 ubuntu)
+
+6. SSH(secure shell) 설정
+   버추얼박스 설정 -> 네트워크 -> 고급 -> 포트포워딩 -> 22
+
+7. putty/secureCRT 설정 후 원격접속 
+   127.0.0.1 / 22(포트)
+
+8. $ sudo apt update
+   $ export SAMPLE=test
+   $ echo $SAMPLE
+   $ env
+
+9. 자바설치
+   $ sudo apt install openjdk-11-jdk
+   
+10. 자바환경변수 설정
+  $ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+  $ export PATH=$PATH:$JAVA_HOME/bin
+  $ export CLASSPATH=$CLASSPATH:$JAVA_HOME/lib/*:.
+ 
+  $ echo $JAVA_HOME
+  $ echo $PATH
+  $ echo $CLASSPATH
+
+11. $ nano Sample.java
+class Sample {
+    public static void main(String[] args) {
+        System.out.println("Hello World");
+    }
+}
+control-O(저장) / enter / control-X(exit)   
+$ javac Sample.java
+$ java Sample
+
+https://dlcdn.apache.org/hadoop/common/hadoop-3.3.1/hadoop-3.3.1.tar.gz
+
+12. $ nano $HOME/.bashrc
+export HADOOP_HOME=$HOME/hadoop-3.3.1/
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+
+control-O/ enter / control-X
+
+$ source $HOME/.bashrc
+
+13. cd $HADOOP_HOME/etc/hadoop
+cf. export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+
+https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/SingleCluster.html 참고해서 설정
+
+ $ nano hadoop-env.sh
+ $ nano core-site.xml
+ $ nano hdfs-site.xml
+ $ nano mapred-site.xml
+ $ nano yarn-site.xml
+ 
+14. 자동로그인 
+  $ ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+  $ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+  $ chmod 0600 ~/.ssh/authorized_keys
+
+  $ ssh localhost
+  비밀번호 입력이 없이 로그인되는지 확인(처음 fingerprint -> yes)
+
+  $ exit
+
+15. HDFS 포맷 
+  $ hdfs namenode -format 
+     $HOME/temp 아래에 dfs 폴더 생성되는지 확인
+
+16. HDFS 서버실행
+  $ start-dfs.sh -> stop-dfs.sh
+
+17. MapReduce 서버실행
+  $ start-yarn.sh -> stop-yarn.sh
+
+18. 서버실행 확인(5개의 서버)
+  $ jps 
+
+19. 위키 예제 실행
+
+$ wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1oaq1XvmPSyLBrtZkpncuC7YpG10tQi8U' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1oaq1XvmPSyLBrtZkpncuC7YpG10tQi8U" -O data.tar.gz && rm -rf /tmp/cookies.txt
+
+$ tar xvfz data.tar.gz
+$ cd data
+$ hdfs dfs -put 2M.ID.CONTENTS  /input
+$ hdfs dfs -ls /input
+
+$ hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.0.jar wordcount /input/2M.ID.CONTENTS /output_wiki
+
+20. 결과조회
+$ hdfs dfs -cat /output_wiki/part-r-0000 | grep world
+
+
+결과가공
+1. 단어처리 
+     is are were -> be
+     sample / samples -> sample
+     sample0 -> sample 
+   특수기호 제거 !@#$%^&*()_+-={}[];:"'<>,.?/
+     (sample) -> sample
+               
+2. 한글처리 
+    나는 너를 사랑해
+    너를 나는 사랑해
+    사랑해 너를 나는
+
+    나는 / 나를 -> 동일 단어 
+    조사(주격/목적격 조사)
+
+    1/2/3/4/5 형식 -> 어순
+    I love you. 
+    You love me.
+    You love I
+
+    "형태소 분석 -> 조사 / 어미 처리 -> 토크나이저"
+
+3. 맞춤법이 틀리면 / 띄어쓰기 보정
+
+   며칠(몇 일) 
+   짜장면/자장면    
+
+
+
+
+
+
+
+워드카운트(비정형 데이터 처리)
+SparkSQL(반정형/정형 데이터 처리)
+
+DBMS vs. Spark/Hadoop vs. 검색엔진(Elastic search)
+
+Elastic
+
+- Log/Data Monitoring System
+
+Elasticstack vs. Splunk
+   Logstash(로그취합) + Elasticsearch(로그검색) + Kibana(시각화)
+
+빅데이터의 끝판왕? -> 구글 DataFlow/BigQuery
+
+
+
+
+
+
+
+
+
+
+
+
+
+
