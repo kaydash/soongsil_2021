@@ -1,0 +1,86 @@
+SQL on Bigdata
+ - Hive 2
+ - SparkSQL
+
++ 쿼리 옵티마이저(Catalyst Optimizer)
++ 코딩 -> 쿼리
+
+RDD -> SparkSQL (성능이 2배까지 차이)
+
+docker ps -a
+docker start xxxx
+docker logs xxxx
+docker exec -it xxxx bash
+
+# wget https://s3-eu-west-1.amazonaws.com/csparkdata/ol_cdump.json   
+
+# gzip ol_cdump.json
+# gzip -d ol_cdump.json.gz
+# apt update
+# apt install bzip2
+# bzip2 ol_cdump.json
+# bzip2 -d ol_cdump.json.bz2
+
+spark.sql("SELECT count(*) FROM cdump").show()
+spark.sql("SELECT * from cdump limit 10").show()
+spark.sql("SELECT count(distinct authors) from cdump").show()
+spark.sql("SELECT authors,genres,title,type,isbn_10,number_of_pages,languages from cdump  order by title desc limit 10").show()
+spark.sql("SELECT authors,genres,title,type,isbn_10,number_of_pages,languages from cdump where genres is not null order by number_of_pages desc limit 10").show()
+spark.sql("SELECT authors,genres,title,type,isbn_10,number_of_pages,languages from cdump where title like '%travel%' order by number_of_pages desc limit 20").show()
+
+equi-join(standard) vs. non-equi join
+
+select * from person full join address on person.name = address.name
+
+Inner Join
+  null 값이 나오는 것은 삭제 
+
+Full Join
+  null 이 나오는 것도 다 출력
+
+Left Join / Right Join
+  Full Join은 MySQL/MariaDB에서 지원하지 않음
+
+RDBMS은 
+1. 테이블기반 데이터베이스
+2. 조인(테이블 합치는 연산)으로 처리 -> 큰 데이터가 생김
+      최적화
+
+cf. 오라클은 조인대신 서브쿼리로 해결하는 경우가 많음(MySQL은 서브쿼리최적화가 약함)
+
+- 테이블 하나 DF/DS 하나씩 할당
+  테이블 - JSON - 스파크 뷰 - 데이터프레임/데이터셋 - 조인
+
+- JSON의 키(컬럼) 하나가 원자성을 안가지는 경우
+     value가 배열이나 오브젝트가 되는 경우 -> JSON 하나가 데이터프레임 여러 개에 대응(***)
+
+
+ol_cdump의 authors를 explode()로 구현하시오.
+
+sjha72@gmail.com로 제출해 주세요.
+
+type:string
+
+"authors": [{"type": {"key": "/type/author_role"}, "author": {"key": "/authors/OL5360212A"}}]
+
+
+OS -> 환경변수 영역(Process마다)
+
+부모프로세스 -> fork(create process) -> 자식프로세스
+  환경변수 복사가 일어남(***)
+ 
+$ export SAMPLE=hello (SAMPLE = HELLO 는 에러발생)
+  관례적으로 환경변수 이름은 대문자 
+
+cf. set SAMPLE=hello (windows)
+
+$ echo $SAMPLE
+환경변수의 값 확인
+
+cf. echo %SAMPLE% (windows)
+
+$ env     cf. set (windows)
+전체 환경변수 내용 출력
+
+
+
