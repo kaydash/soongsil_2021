@@ -1,0 +1,143 @@
+캐논 카메라
+Canon replace VxWorks with DryOS? - DPReviewhttps://www.dpreview.com › forums › post
+
+실시간 근접 대응구조 1
+1. per Queue(개별 큐)
+2. DWRR -> WFQ(Weight Fair Queueing)
+
+실시간 근접 대응구조 2
+1. per Class(클래스별 큐)
+2. Real-time/Gold/silver/bronze/Best effort(기본)
+   무조건 Real-time을 먼저 처리해줌
+
+Batch : 초,분,시간 수준의 일괄처리
+Near Real-time : 초단위 수준의 지연시간 보장
+Real-time : Milliseconds 수준의 처리 보장
+Real Real-time : Microseconds 수준의 처리 보장
+
+
+큐의 길이가 길어지면?  
+   딜레이 커진다 
+   -> real-time으로는 안 좋은 결과, Throughput(전송량/률)과는 트레이드 오프 
+ 
+   큐의 길이가 짧아지면?  딜레이 작아진다 -> real-time으로는 좋은 결과
+
+bps(bits per second) / Bps(Bytes per second) / Pps(Packets per second)
+
+1 패킷의 평균길이(512바이트, 4O바이트-64KB)
+
+네트워크, 디스크 I/O 
+send() -> sendbuf  / recv() -> recvbuf
+
+blocking - 후출을 했는데 리턴이 안되는 상황(send() / recv())
+            -> sendbuf가 꽉 찬 경우 / recvbuf가 텅 빈 경우  ***
+
+
+
+I/O 프로그래밍(네트워크, 디스크)
+  stream? 1-d array with un-determined length      
+  -> 고수준 I/O 프로그래밍(추상화) -> 물리특성 반영X
+  -> 제어단위(스트림/파일)
+
+FileInputStream/FileOutputStream 
+SocketInputStream/SocketOutputStream
+ObjectInputStream/ObjectOutputStream 
+
+read()/write() - 거의 같은 인터페이스로 네트워크 / 파일 프로그래밍
+
+
+-> 저수준 I/O 프로그래밍 -> 물리특성 반영O
+    제어단위(섹터 512바이트, 클러스터 4KB, 패킷)
+
+NTFS / ex-FAT(windows)  / ext4fs(Linux) / HPFS(macOS)
+
+cf. v3 for Windows95(FAT계열) / v3 for WindowsNT(NTFS)
+cf. Visual Studio 64bit(제대로 된 퍼포먼스) -> 32bit OS 램 4GB
+
+
+Mid-level I/O  프로그래밍
+
+- 제어단위(버퍼-네트워크/디스크)
+  16KB(sendbuf/recvbuf)
+
+버퍼의 상태를 알려주는 함수 select() / WSAAsyncSelect() -> send()/recv()
+
+blocking -> 해당 프로세스가 죽을 가능성이 높아짐
+   CPU / 메모리 -> 치명적이지 않음(신뢰성이 높음)
+   네트워크, 디스크 -> 치명적(신뢰성이 낮음)
+      -> 딜레이
+
+함수호출시 리턴될 때까지 기다림 -> 블로킹/동기(리턴 안 될 경우 치명적)
+함수호출시 리턴될 때까지 기다리지 않음 -> 넌블로킹/비동기(리턴 안 될 경우도 대응가능)
+     cf. 동기복제 / 비동기복제(업데이트를 한꺼번에 할 것인가? 부분적으로 할 것인가?)
+ 
+네트워크 프로그래밍 난이도 -> 네트워크 라이브러리(프레임워크)
+     cf. Netty(게임의 엔진, WAS)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Topic(Leader/Follower)
+cf. Master - Slave Replication(90% 복제, 이중화 방향이 있슴)
+    Master - Master Replication(10%) cf. 블럭체인 
+    Multi-master Replication -> Group Replication(MySQL 8)
+
+동기 복제- 모든 노드가 다 업데이트 되었는지 확인 후 commit
+반동기 복제 - Follower 중에 하나는 업데이트 보장
+비동기 복제 - Leader만 업데이트 후 Follower로 복사
+
+오라클 DBMS은 동기복제
+MySQL은 비동기복제 / 반동기복제 지원
+  cf. MySQL 기반의 동기복제 -> Galera Cluster 
+
+1. Active-standby방식의 마스터 복제
+2. Active-Active방식의 마스터 복제
+cf. HDFS의 네임노드(Active-standby) - 주키퍼
+
+Active-Active 동기복제 -> 오라클 RAC(Real Application Clusters)
+Acitive-Standby 반동기/비동기복제 -> MySQL MMM(Multi-master replication Manager)
+
+version: '2'
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+  kafka:
+    image: wurstmeister/kafka:2.12-2.5.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+$ docker-compose up -d
+$ docker ps -a
+
+
+
+
