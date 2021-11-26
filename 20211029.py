@@ -109,7 +109,10 @@ import org.apache.spark._
 import org.apache.spark.streaming._
 
 val ssc = new StreamingContext(sc, Seconds(5))      // 5초간격 배치 처리 
-val lines = ssc.socketTextStream("127.0.0.1", 9999) // 텍스트를 입력 받을 IP, port 입력 
+val lines = ssc.socketTextStream("127.0.0.1", 9999) // 텍스트를 입력 받을 IP, port 입력.
+// 127.0.0.1 IP가 안되면(커넥션 리퓨즈 등), docker ps -a 로 컨테이너명 확인 후, 
+//d ocker inspect adoring_chaplygin(컨테이너명) | grep IPAddress 으로 IP 확인하여 그것으로 접속
+
 val words = lines.flatMap(_.split(" "))
 val pairs = words.map(word => (word, 1))
 val wordCounts = pairs.reduceByKey(_ + _)
@@ -137,6 +140,7 @@ su - hdroot
 start-dfs.sh
 start-yarn.sh
 hdfs mkdir -p /data/spark_tmp/checkpoint
+cd /data/spark_tmp/
 
 spark-shell
 """
@@ -144,7 +148,7 @@ import org.apache.spark._
 import org.apache.spark.streaming._
 
 val ssc = new StreamingContext(sc, Seconds(5))
-val lines = ssc.socketTextStream("192.168.0.99", 9999)
+val lines = ssc.socketTextStream("192.168.0.118", 9999)
 val words = lines.flatMap(_.split(" "))
 val pairs = words.map(word => (word, 1))
 val wordCounts = pairs.reduceByKey(_ + _)

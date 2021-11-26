@@ -30,7 +30,7 @@ vi /etc/sysconfig/selinux
 """
 SELINUX=disabled
 """
-reboot -f
+# reboot -f
 
 
 vi ~/.bash_profile
@@ -189,6 +189,9 @@ vi ~/.bashrc
 
 
 
+
+""""""
+
 ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 chmod 0600 ~/.ssh/authorized_keys
@@ -200,7 +203,7 @@ exit
 
 
 hdfs namenode -format
-ls -al /data/hdfs_dir
+ls -al /home/hdroot/data/hdfs_dir
 start-dfs.sh
 start-yarn.sh
 jps
@@ -325,6 +328,6 @@ Found 2 items
 
 hdfs dfs -cat /output_wiki/part-r-00000 | grep "world" | awk '{sum += $2} END {print sum}' 
 
-cat sample.lst | awk '{sum += $2} END {print sum}' 
+# cat sample.lst | awk '{sum += $2} END {print sum}' 
 
- time hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.1.jar wordcount /input/2M.ID.CONTENTS /output_wiki > wordCount_wiki.log 2>&1 &
+time hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.1.jar wordcount /input/2M.ID.CONTENTS /output_wiki2 > wordCount_wiki.log 2>&1 &
